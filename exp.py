@@ -47,18 +47,10 @@ def get_time_series_l(project_id, filter_, num_days_back):
     )
 
 
-def get_num_req_arrivals(project_id, subscription_id_regex, num_days_back):
+def get_num_req_arrivals(project_id, topic_id_regex, num_days_back):
     # https://cloud.google.com/monitoring/api/metrics_gcp#gcp-pubsub
-    # filter_ = 'metric.type = "pubsub.googleapis.com/subscription/sent_message_count"' + " AND " + \
-    #           'resource.labels.subscription_id = monitoring.regex.full_match("{}")'.format(subscription_id_regex)
-    # filter_ = 'metric.type = "pubsub.googleapis.com/subscription/push_request_count"' + " AND " + \
-    #           'resource.labels.subscription_id = monitoring.regex.full_match("{}")'.format(".*-predreq-queue-dev")
-
-    # filter_ = 'metric.type = "pubsub.googleapis.com/topic/send_request_count"' + " AND " + \
-    #           'resource.labels.topic_id = monitoring.regex.full_match("{}")'.format(".*-predreq-topic-dev")
-    # filter_ = 'metric.type = "pubsub.googleapis.com/topic/send_request_count"'
     filter_ = 'metric.type = "pubsub.googleapis.com/topic/send_request_count"' + " AND " + \
-              'resource.labels.topic_id = "aggregate-prediction-requests-ml-dev"'
+              'resource.labels.topic_id = monitoring.regex.full_match("{}")'.format(topic_id_regex)
     time_series_l = get_time_series_l(project_id, filter_, num_days_back)
     
     num_req_arrivals = 0
@@ -80,10 +72,10 @@ if __name__ == "__main__":
     # list_num_publish_reqs(project_id = "machinelearning-research")
 
     project_id = "machinelearning-research"
-    topic_id = "aggregate-prediction-requests-ml-dev"
-    subscription_id_regex = "gcf-prediction_aggregator-sub-.*"
+    # topic_id_regex = ".*-predreq-topic-dev"
+    topic_id_regex = "aggregate-prediction-requests.*"
     
-    num_days_back = 1/24 # 30
+    num_days_back = 6/24 # 30
     
-    num_req_arrivals = get_num_req_arrivals(project_id, subscription_id_regex, num_days_back)
+    num_req_arrivals = get_num_req_arrivals(project_id, topic_id_regex, num_days_back)
     log(DEBUG, "", num_req_arrivals=num_req_arrivals, num_days_back=num_days_back)
